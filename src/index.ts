@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import { Actions } from './actions';
 import { GitHub } from './github';
 import { inputs } from './inputs';
+import { FullyQualifiedRef } from './lib/ref';
 import { Tag } from './lib/tag';
 import { determineNextVersion, displayVersion } from './lib/utils';
 
@@ -32,7 +33,10 @@ async function run() {
       const prevTagCommitSha = await actions.getTagCommitSha(prevTag);
 
       // test
-      await actions.tags.create('refs/tags/funky', prevTagCommitSha);
+      await actions.tags.create(
+        'tags/funky' as FullyQualifiedRef<'tags'>,
+        prevTagCommitSha
+      );
 
       await actions.branches.create(
         `refs/heads/${prevTag.version.major}.x`,
