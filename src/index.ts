@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
 import { Actions } from './actions';
 import { GitHub } from './github';
 import { inputs } from './inputs';
@@ -7,15 +6,6 @@ import { Tag } from './lib/tag';
 import { determineNextVersion, displayVersion } from './lib/utils';
 
 async function run() {
-  const token = core.getInput('token');
-  const octokit = github.getOctokit(token);
-
-  await octokit.rest.git.createRef({
-    ...github.context.repo,
-    ref: 'refs/tags/funky',
-    sha: '05bea57ca7352f3deeb9d3af2d94c8bd9916be18'
-  });
-
   displayVersion();
   const actions: Actions<any> = new GitHub(inputs.token);
 
