@@ -1,16 +1,20 @@
-import { RefString } from './ref';
+import { FullyQualifiedRef, ShortenedRef } from './ref';
 import { SemVer } from './version';
 
 export class Tag {
   public static readonly PREFIX: string = 'v';
   public readonly version: SemVer;
-  public readonly ref: RefString<'tags'>;
-  public readonly majorRef: RefString<'tags'>;
+  public readonly shortRef: ShortenedRef<'tags'>;
+  public readonly shortMajorRef: ShortenedRef<'tags'>;
+  public readonly fqRef: FullyQualifiedRef<'tags'>;
+  public readonly fqMajorRef: FullyQualifiedRef<'tags'>;
 
   constructor(version: SemVer) {
     this.version = version;
-    this.ref = `refs/tags/${this.toString()}`;
-    this.majorRef = `refs/tags/${this.toMajorString()}`;
+    this.shortRef = `tags/${this.toString()}`;
+    this.shortMajorRef = `tags/${this.toMajorString()}`;
+    this.fqRef = `refs/${this.shortRef}`;
+    this.fqMajorRef = `refs/${this.shortMajorRef}`;
   }
 
   public static parseTag(tag: string): Tag {

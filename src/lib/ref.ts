@@ -1,2 +1,4 @@
-export type RefStringTypes = 'heads' | 'tags' | 'pull' | 'notes' | 'remotes';
-export type RefString<Type extends RefStringTypes> = `refs/${Type}/${string}`;
+export type RefTypes = 'heads' | 'tags' | 'pull' | 'notes' | 'remotes';
+export type ShortenedRef<Type extends RefTypes> = `${Type}/${string}`;
+export type FullyQualifiedRef<Type extends RefTypes> =
+  `refs/${ShortenedRef<Type>}`;

@@ -1,5 +1,5 @@
 import { Commit } from './lib/commit';
-import { RefString, RefStringTypes } from './lib/ref';
+import { RefTypes, ShortenedRef } from './lib/ref';
 import { Tag } from './lib/tag';
 
 export interface Actions<SourceCommitType> {
@@ -12,11 +12,11 @@ export interface Actions<SourceCommitType> {
   releases: ReleaseActions<SourceCommitType>;
 }
 
-export interface RefActions<Type extends RefStringTypes> {
-  create(ref: RefString<Type>, sha: string): Promise<void>;
-  update(ref: RefString<Type>, sha: string): Promise<void>;
-  save(ref: RefString<Type>, sha: string): Promise<void>;
-  delete(ref: RefString<Type>): Promise<void>;
+export interface RefActions<Type extends RefTypes> {
+  create(ref: ShortenedRef<Type>, sha: string): Promise<void>;
+  update(ref: ShortenedRef<Type>, sha: string): Promise<void>;
+  save(ref: ShortenedRef<Type>, sha: string): Promise<void>;
+  delete(ref: ShortenedRef<Type>): Promise<void>;
 }
 
 export interface ReleaseActions<SourceCommitType> {

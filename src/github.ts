@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Actions, RefActions, ReleaseActions } from './actions';
 import { Commit } from './lib/commit';
-import { RefString, RefStringTypes } from './lib/ref';
+import { FullyQualifiedRef, RefTypes, ShortenedRef } from './lib/ref';
 import { ReleaseBody } from './lib/release';
 import { Tag } from './lib/tag';
 
@@ -28,7 +28,7 @@ abstract class GitHubAction {
   protected readonly octokit: ReturnType<typeof github.getOctokit>;
   protected readonly baseUri: string;
   protected readonly branchName: string;
-  protected readonly branchRef: RefString<'heads'>;
+  protected readonly branchRef: FullyQualifiedRef<'heads'>;
 
   constructor(octokit: Octokit) {
     this.repo = github.context.repo;
@@ -36,7 +36,7 @@ abstract class GitHubAction {
     this.baseUri = `${github.context.serverUrl}/${this.repo.owner}/${this.repo.repo}`;
 
     // get branch name of the workflow
-    const branchRefPrefix: RefString<'heads'> = 'refs/heads/';
+    const branchRefPrefix: FullyQualifiedRef<'heads'> = 'refs/heads/';
     this.branchName = github.context.ref.split(branchRefPrefix).pop()!;
     this.branchRef = `refs/heads/${this.branchName}`;
 
@@ -87,7 +87,7 @@ export class GitHub
     if (sinceTag) {
       const { data } = await this.octokit.rest.repos.compareCommits({
         ...this.repo,
-        base: sinceTag.ref,
+        base: sinceTag.fqRef,
         head: this.branchRef
       });
       return data.commits.map((commit) => new GitHubCommit(commit));
@@ -117,7 +117,7 @@ export class GitHub
   }
 }
 
-class GitHubRefs<Type extends RefStringTypes>
+class GitHubRefs<Type extends RefTypes>
   extends GitHubAction
   implements RefActions<Type>
 {
@@ -125,17 +125,17 @@ class GitHubRefs<Type extends RefStringTypes>
     super(octokit);
   }
 
-  async create(ref: RefString<Type>, sha: string): Promise<void> {
+  async create(ref: ShortenedRef<Type>, sha: string): Promise<void> {
     await this.octokit.rest.git.createRef({ ...this.repo, ref, sha });
     core.info(`Ref created: ${ref}`);
   }
 
-  async update(ref: RefString<Type>, sha: string): Promise<void> {
+  async update(ref: ShortenedRef<Type>, sha: string): Promise<void> {
     await this.octokit.rest.git.updateRef({ ...this.repo, ref, sha });
     core.info(`Ref updated: ${ref}`);
   }
 
-  async save(ref: RefString<Type>, sha: string): Promise<void> {
+  async save(ref: ShortenedRef<Type>, sha: string): Promise<void> {
     let refAlreadyExists = false;
     try {
       await this.octokit.rest.git.getRef({ ...this.repo, ref });
@@ -153,7 +153,7 @@ class GitHubRefs<Type extends RefStringTypes>
     }
   }
 
-  async delete(ref: RefString<Type>): Promise<void> {
+  async delete(ref: ShortenedRef<Type>): Promise<void> {
     await this.octokit.rest.git.deleteRef({ ...this.repo, ref });
     core.info(`Ref deleted: ${ref}`);
   }
