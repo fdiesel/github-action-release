@@ -35,7 +35,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const github_1 = require("./github");
 const inputs_1 = require("./inputs");
-const strategy_1 = require("./lib/strategy");
 const tag_1 = require("./lib/tag");
 const utils_1 = require("./lib/utils");
 function run() {
@@ -53,7 +52,6 @@ function run() {
         const nextVersion = (0, utils_1.determineNextVersion)(prevTag === null || prevTag === void 0 ? void 0 : prevTag.version, commits, inputs_1.inputs.phase);
         const nextTag = nextVersion && new tag_1.Tag(nextVersion);
         if (nextTag) {
-            (0, strategy_1.runStrategies)(nextTag);
             // create release branch if major version is bumped
             if ((prevTag === null || prevTag === void 0 ? void 0 : prevTag.version) && (prevTag === null || prevTag === void 0 ? void 0 : prevTag.version.major) < nextTag.version.major) {
                 const prevTagCommitSha = yield actions.getTagCommitSha(prevTag);
