@@ -46,7 +46,6 @@ jobs:
         id: release
         uses: ./
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           phase: prod
 
       - name: Update Readme

@@ -20,7 +20,6 @@ export interface RefActions<Type extends RefTypes> {
 }
 
 export interface ReleaseActions<SourceCommitType> {
-  getByTag(tag: Tag): Promise<any>;
   draft(
     prevTag: Tag | undefined,
     nextTag: Tag,

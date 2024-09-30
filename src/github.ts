@@ -167,14 +167,6 @@ class GitHubReleases
     super(octokit);
   }
 
-  async getByTag(tag: Tag) {
-    const { data } = await this.octokit.rest.repos.getReleaseByTag({
-      ...this.repo,
-      tag: tag.toString()
-    });
-    return data;
-  }
-
   async draft(
     prevTag: Tag | undefined,
     nextTag: Tag,

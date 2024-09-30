@@ -12,9 +12,6 @@ async function run() {
   // get latest tag from branch
   const prevTag = await actions.getPrevTag();
 
-  // get latest release from branch
-  const prevRelease = prevTag && (await actions.releases.getByTag(prevTag));
-
   // get commits from branch
   const commits = await actions.getCommits(prevTag);
 
