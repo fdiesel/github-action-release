@@ -48,7 +48,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           strategy: node
-          first: 1.0.0
+          phase: prod
 
       - name: Update Readme
         run: |
