@@ -85,7 +85,7 @@ class GitHub extends GitHubAction {
     getCommits(sinceTag) {
         return __awaiter(this, void 0, void 0, function* () {
             if (sinceTag) {
-                const { data } = yield this.octokit.rest.repos.compareCommits(Object.assign(Object.assign({}, this.repo), { base: sinceTag.ref, head: this.branchRef }));
+                const { data } = yield this.octokit.rest.repos.compareCommits(Object.assign(Object.assign({}, this.repo), { base: sinceTag.fqRef, head: this.branchRef }));
                 return data.commits.map((commit) => new GitHubCommit(commit));
             }
             else {
