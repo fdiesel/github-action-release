@@ -51,7 +51,7 @@ class GitHubAction {
         // get branch name of the workflow
         const branchRefPrefix = 'refs/heads/';
         this.branchName = github.context.ref.split(branchRefPrefix).pop();
-        this.branchRef = `refs/heads/${this.branchName}`;
+        this.branchRef = `${branchRefPrefix}${this.branchName}`;
         // // Check if the event is a pull request
         // if (github.context.payload.pull_request) {
         //   // For pull request events, use the source branch (head branch)
