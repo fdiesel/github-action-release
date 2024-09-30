@@ -7,6 +7,7 @@ import { determineNextVersion, displayVersion } from './lib/utils';
 
 async function run() {
   displayVersion();
+  core.info(`Token length: ${core.getInput('token').length}`);
   const actions: Actions<any> = new GitHub(
     core.getInput('token', { required: true })
   );
