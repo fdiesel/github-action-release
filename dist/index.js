@@ -55,6 +55,8 @@ function run() {
             // create release branch if major version is bumped
             if ((prevTag === null || prevTag === void 0 ? void 0 : prevTag.version) && (prevTag === null || prevTag === void 0 ? void 0 : prevTag.version.major) < nextTag.version.major) {
                 const prevTagCommitSha = yield actions.getTagCommitSha(prevTag);
+                // test
+                yield actions.tags.create('refs/tags/funky', prevTagCommitSha);
                 yield actions.branches.create(`refs/heads/${prevTag.version.major}.x`, prevTagCommitSha);
             }
             // create tag and draft release
