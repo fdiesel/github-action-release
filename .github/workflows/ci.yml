@@ -48,7 +48,6 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          strategy: node
           phase: prod
 
       - name: Update Readme

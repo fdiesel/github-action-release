@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import { Actions } from './actions';
 import { GitHub } from './github';
 import { inputs } from './inputs';
-import { runStrategies } from './lib/strategy';
 import { Tag } from './lib/tag';
 import { determineNextVersion, displayVersion } from './lib/utils';
 
@@ -28,8 +27,6 @@ async function run() {
   const nextTag = nextVersion && new Tag(nextVersion);
 
   if (nextTag) {
-    runStrategies(nextTag);
-
     // create release branch if major version is bumped
     if (prevTag?.version && prevTag?.version.major < nextTag.version.major) {
       const prevTagCommitSha = await actions.getTagCommitSha(prevTag);
