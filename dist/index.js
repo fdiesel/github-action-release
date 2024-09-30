@@ -48,7 +48,7 @@ function run() {
         // get latest release from branch
         const prevRelease = prevTag && (yield actions.releases.getByTag(prevTag));
         // get commits from branch
-        const commits = yield actions.getCommitsAfterTag(prevRelease === null || prevRelease === void 0 ? void 0 : prevRelease.published_at);
+        const commits = yield actions.getCommits(prevTag);
         // determine next version
         const nextVersion = (0, utils_1.determineNextVersion)(prevTag === null || prevTag === void 0 ? void 0 : prevTag.version, commits, inputs_1.inputs.phase);
         const nextTag = nextVersion && new tag_1.Tag(nextVersion);

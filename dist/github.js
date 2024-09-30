@@ -82,10 +82,16 @@ class GitHub extends GitHubAction {
             return data.length > 0 ? tag_1.Tag.parseTag(data[0].name) : undefined;
         });
     }
-    getCommitsAfterTag(tag) {
+    getCommits(sinceTag) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { data } = yield this.octokit.rest.repos.compareCommits(Object.assign(Object.assign({}, this.repo), { base: tag.ref, head: this.branchRef }));
-            return data.commits.map((commit) => new GitHubCommit(commit));
+            if (sinceTag) {
+                const { data } = yield this.octokit.rest.repos.compareCommits(Object.assign(Object.assign({}, this.repo), { base: sinceTag.ref, head: this.branchRef }));
+                return data.commits.map((commit) => new GitHubCommit(commit));
+            }
+            else {
+                const { data } = yield this.octokit.rest.repos.listCommits(Object.assign(Object.assign({}, this.repo), { sha: this.branchName }));
+                return data.map((commit) => new GitHubCommit(commit));
+            }
         });
     }
     getTagCommitSha(tag) {
