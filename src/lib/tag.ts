@@ -1,3 +1,4 @@
+import { RefString } from './ref';
 import { SemVer } from './version';
 
 export class Tag {

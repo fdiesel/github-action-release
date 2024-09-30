@@ -1,4 +1,5 @@
 import { Commit } from './lib/commit';
+import { RefString, RefStringTypes } from './lib/ref';
 import { Tag } from './lib/tag';
 
 export interface Actions<SourceCommitType> {

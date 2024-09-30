@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Actions, RefActions, ReleaseActions } from './actions';
 import { Commit } from './lib/commit';
+import { RefString, RefStringTypes } from './lib/ref';
 import { ReleaseBody } from './lib/release';
 import { Tag } from './lib/tag';
 
