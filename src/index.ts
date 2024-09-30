@@ -17,7 +17,7 @@ async function run() {
   const prevRelease = prevTag && (await actions.releases.getByTag(prevTag));
 
   // get commits from branch
-  const commits = await actions.getCommitsAfterTag(prevRelease?.published_at);
+  const commits = await actions.getCommits(prevTag);
 
   // determine next version
   const nextVersion = determineNextVersion(

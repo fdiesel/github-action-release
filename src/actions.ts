@@ -4,7 +4,7 @@ import { Tag } from './lib/tag';
 
 export interface Actions<SourceCommitType> {
   getPrevTag(): Promise<Tag | undefined>;
-  getCommitsAfterTag(tag: Tag): Promise<Commit<SourceCommitType>[]>;
+  getCommits(sinceTag?: Tag): Promise<Commit<SourceCommitType>[]>;
   getTagCommitSha(tag: Tag): Promise<string>;
   getLatestCommitSha(): Promise<string>;
   tags: RefActions<'tags'>;

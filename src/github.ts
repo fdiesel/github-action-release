@@ -83,13 +83,21 @@ export class GitHub
     return data.length > 0 ? Tag.parseTag(data[0].name) : undefined;
   }
 
-  async getCommitsAfterTag(tag: Tag): Promise<Commit<GitHubSourceCommit>[]> {
-    const { data } = await this.octokit.rest.repos.compareCommits({
-      ...this.repo,
-      base: tag.ref,
-      head: this.branchRef
-    });
-    return data.commits.map((commit) => new GitHubCommit(commit));
+  async getCommits(sinceTag?: Tag): Promise<Commit<GitHubSourceCommit>[]> {
+    if (sinceTag) {
+      const { data } = await this.octokit.rest.repos.compareCommits({
+        ...this.repo,
+        base: sinceTag.ref,
+        head: this.branchRef
+      });
+      return data.commits.map((commit) => new GitHubCommit(commit));
+    } else {
+      const { data } = await this.octokit.rest.repos.listCommits({
+        ...this.repo,
+        sha: this.branchName
+      });
+      return data.map((commit) => new GitHubCommit(commit));
+    }
   }
 
   async getTagCommitSha(tag: Tag): Promise<string> {
