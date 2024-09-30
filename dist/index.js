@@ -33,75 +33,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const commit_1 = require("./lib/commit");
-const github_1 = require("./lib/github");
+const github_1 = require("./github");
+const inputs_1 = require("./inputs");
 const strategy_1 = require("./lib/strategy");
 const tag_1 = require("./lib/tag");
 const utils_1 = require("./lib/utils");
-const version_1 = require("./lib/version");
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a;
         (0, utils_1.displayVersion)();
-        const prevRelease = yield (0, github_1.getLatestChronologicalRelease)();
-        const prevTag = prevRelease ? new tag_1.Tag(prevRelease.tag_name) : undefined;
-        const commits = yield (0, github_1.getLatestCommits)(prevRelease === null || prevRelease === void 0 ? void 0 : prevRelease.published_at);
-        let nextVersion;
-        const preReleaseNamePreset = core.getInput('pre-release')
-            ? (0, version_1.parseSemVerPreReleaseName)(core.getInput('pre-release'))
-            : undefined;
-        if (prevTag) {
-            nextVersion = prevTag.version;
-            const latestPreReleaseName = (_a = commits.find((commit) => !!commit.preReleaseName)) === null || _a === void 0 ? void 0 : _a.preReleaseName;
-            const preReleaseBumpTarget = latestPreReleaseName
-                ? (0, version_1.parseBumpTarget)(latestPreReleaseName)
-                : undefined;
-            let mainBumpTarget;
-            for (const commit of commits) {
-                if (!commit.conventionalCommitMessage)
-                    continue;
-                const { type, isBreakingChange } = commit.conventionalCommitMessage;
-                if (isBreakingChange) {
-                    mainBumpTarget = version_1.BumpTarget.Major;
-                    break;
-                }
-                if (type === commit_1.ConventionalCommitType.FEAT &&
-                    (!mainBumpTarget || mainBumpTarget === version_1.BumpTarget.Patch)) {
-                    mainBumpTarget = version_1.BumpTarget.Minor;
-                }
-                else if (type === commit_1.ConventionalCommitType.FIX && !mainBumpTarget) {
-                    mainBumpTarget = version_1.BumpTarget.Patch;
-                }
+        const actions = new github_1.GitHub(inputs_1.inputs.token);
+        // get latest tag from branch
+        const prevTag = yield actions.getPrevTag();
+        // get latest release from branch
+        const prevRelease = prevTag && (yield actions.releases.getByTag(prevTag));
+        // get commits from branch
+        const commits = yield actions.getCommitsAfterTag(prevRelease === null || prevRelease === void 0 ? void 0 : prevRelease.published_at);
+        // determine next version
+        const nextVersion = (0, utils_1.determineNextVersion)(prevTag === null || prevTag === void 0 ? void 0 : prevTag.version, commits, inputs_1.inputs.phase);
+        const nextTag = nextVersion && new tag_1.Tag(nextVersion);
+        if (nextTag) {
+            (0, strategy_1.runStrategies)(nextTag);
+            // create release branch if major version is bumped
+            if ((prevTag === null || prevTag === void 0 ? void 0 : prevTag.version) && (prevTag === null || prevTag === void 0 ? void 0 : prevTag.version.major) < nextTag.version.major) {
+                const prevTagCommitSha = yield actions.getTagCommitSha(prevTag);
+                yield actions.branches.create(`refs/heads/${prevTag.version.major}.x`, prevTagCommitSha);
             }
-            if (mainBumpTarget === version_1.BumpTarget.Major ||
-                mainBumpTarget === version_1.BumpTarget.Minor ||
-                (mainBumpTarget === version_1.BumpTarget.Patch && !preReleaseBumpTarget)) {
-                nextVersion = version_1.SemVer.bump(nextVersion, mainBumpTarget);
-            }
-            if (preReleaseBumpTarget) {
-                nextVersion = version_1.SemVer.bump(nextVersion, preReleaseBumpTarget);
-            }
-            else if (preReleaseNamePreset) {
-                nextVersion = version_1.SemVer.bump(nextVersion, preReleaseNamePreset);
-            }
-        }
-        else {
-            nextVersion = version_1.SemVer.first();
-            if (preReleaseNamePreset) {
-                nextVersion = version_1.SemVer.bump(nextVersion, preReleaseNamePreset);
-            }
-        }
-        const nextTag = new tag_1.Tag(nextVersion.toString());
-        (0, strategy_1.runStrategies)(nextTag);
-        core.setOutput('tag', nextTag.toString());
-        core.setOutput('majorTag', nextTag.toMajorString());
-        core.setOutput('version', nextTag.version.toString());
-        core.setOutput('major', nextTag.version.major.toString());
-        if ((prevTag === null || prevTag === void 0 ? void 0 : prevTag.toString()) !== nextTag.toString()) {
-            yield (0, github_1.createTag)(nextTag, yield (0, github_1.getLatestCommitSha)());
-            yield (0, github_1.draftRelease)(prevTag, nextTag, commits);
+            // create tag and draft release
+            yield actions.tags.create(nextTag.ref, commits[0].sha);
+            const releaseId = yield actions.releases.draft(prevTag, nextTag, commits);
+            core.saveState('releaseId', releaseId);
+            core.saveState('prevVersion', prevTag === null || prevTag === void 0 ? void 0 : prevTag.version.toString());
+            core.saveState('nextVersion', nextTag.version.toString());
+            core.setOutput('tag', nextTag.toString());
+            core.setOutput('majorTag', nextTag.toMajorString());
+            core.setOutput('version', nextTag.version.toString());
+            core.setOutput('majorVersion', nextTag.version.major.toString());
             core.setOutput('created', true);
-            core.setOutput('pre-release', (_b = nextTag.version.preRelease) === null || _b === void 0 ? void 0 : _b.toString());
+            core.setOutput('pre-release', (_a = nextTag.version.preRelease) === null || _a === void 0 ? void 0 : _a.toString());
         }
         else {
             core.setOutput('created', false);

@@ -1,8 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SemVer = exports.SemVerPreRelease = exports.parseBumpTarget = exports.BumpTarget = exports.parseSemVerPreReleaseName = exports.SemVerPreReleaseName = void 0;
-const core_1 = require("@actions/core");
+exports.SemVer = exports.SemVerPreRelease = exports.parseBumpTarget = exports.BumpTarget = exports.parseSemVerPreReleaseName = exports.SemVerPreReleaseName = exports.Phase = void 0;
 const parser_1 = require("./parser");
+var Phase;
+(function (Phase) {
+    Phase["Dev"] = "dev";
+    Phase["Prod"] = "prod";
+})(Phase || (exports.Phase = Phase = {}));
 var SemVerPreReleaseName;
 (function (SemVerPreReleaseName) {
     SemVerPreReleaseName["Alpha"] = "alpha";
@@ -22,18 +26,18 @@ var BumpTarget;
 exports.parseBumpTarget = (0, parser_1.enumParserFactory)(BumpTarget, (type) => type.toLowerCase(), (value) => value.toLowerCase());
 class SemVerPreRelease {
     constructor(name, version = 0) {
-        this._name = name;
-        this._version = version;
+        this.name = name;
+        this.version = version;
     }
     toString() {
-        return `${this._name}${this._version > 0 ? `.${this._version}` : ''}`;
+        return `${this.name}${this.version > 0 ? `.${this.version}` : ''}`;
     }
     static bump(preRelease, name) {
-        if (preRelease._name !== name) {
+        if (preRelease.name !== name) {
             return new SemVerPreRelease(name);
         }
         else {
-            return new SemVerPreRelease(name, preRelease._version + 1);
+            return new SemVerPreRelease(name, preRelease.version + 1);
         }
     }
 }
@@ -49,10 +53,15 @@ class SemVer {
         return (`${this.major}.${this.minor}.${this.patch}` +
             (this.preRelease ? `-${this.preRelease.toString()}` : ''));
     }
-    static first() {
-        return SemVer.fromString((0, core_1.getInput)('first'));
+    static init(phase) {
+        switch (phase) {
+            case Phase.Prod:
+                return new SemVer(1, 0, 0);
+            case Phase.Dev:
+                return new SemVer(0, 1, 0);
+        }
     }
-    static fromString(version) {
+    static parse(version) {
         const { major, minor, patch, preReleaseName, preReleaseVersion } = this.matchSemVer(version);
         if (!major || !minor || !patch) {
             throw new Error(`Invalid semver: '${version}'`);
@@ -80,8 +89,6 @@ class SemVer {
                     return new SemVer(version.major, version.minor, version.patch, new SemVerPreRelease(preReleaseName));
                 else
                     return new SemVer(version.major, version.minor, version.patch, SemVerPreRelease.bump(version.preRelease, preReleaseName));
-            default:
-                throw new Error(`Invalid target: ${target}`);
         }
     }
 }

@@ -32,23 +32,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseStrategy = exports.Strategy = void 0;
+exports.Strategy = void 0;
 exports.runStrategies = runStrategies;
-const core_1 = require("@actions/core");
 const github = __importStar(require("@actions/github"));
 const child_process_1 = require("child_process");
-const parser_1 = require("./parser");
+const inputs_1 = require("../inputs");
 var Strategy;
 (function (Strategy) {
     Strategy["NODE"] = "node";
 })(Strategy || (exports.Strategy = Strategy = {}));
-exports.parseStrategy = (0, parser_1.enumParserFactory)(Strategy, (type) => type.toLowerCase(), (value) => value.toLowerCase());
-const strategy = (0, core_1.getInput)('strategy')
-    ? (0, exports.parseStrategy)((0, core_1.getInput)('strategy'))
-    : undefined;
 function runStrategies(nextTag) {
     return __awaiter(this, void 0, void 0, function* () {
-        switch (strategy) {
+        switch (inputs_1.inputs.strategy) {
             case Strategy.NODE:
                 (0, child_process_1.execSync)(`git config user.name "GitHub Actions"`);
                 (0, child_process_1.execSync)(`git config user.email "action@github.com"`);

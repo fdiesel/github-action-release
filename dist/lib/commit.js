@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Commit = exports.ConventionalCommitMessage = exports.parseConventionalCommitType = exports.ConventionalCommitType = void 0;
+const framework_source_1 = require("./framework-source");
 const parser_1 = require("./parser");
 const version_1 = require("./version");
 var ConventionalCommitType;
@@ -18,7 +19,7 @@ class ConventionalCommitMessage {
         this.isBreakingChange = isBreakingChange;
         this.scope = scope;
     }
-    static fromString(message) {
+    static parse(message) {
         const { type, scope, exclamation, header } = this.decomposeMessage(message);
         const isBreakingChange = exclamation === '!' || this.includesBreakingChange(message);
         if (!type || !header) {
@@ -44,21 +45,21 @@ ConventionalCommitMessage.decomposeMessage = (0, parser_1.matchWithRegexFactory)
         .map((type) => type.replace(' ', '-'))
 ].join('|')})(?:\((.+)\))?(?:(\!))?\: (.+)`, 'i'), 'type', 'scope', 'exclamation', 'header');
 ConventionalCommitMessage.includesBreakingChange = (0, parser_1.testWithRegexFactory)(/BREAKING( |-)CHANGES?:/i);
-class Commit {
-    constructor(ref, url, message) {
-        this.ref = ref.substring(0, 7);
-        this.url = url;
-        this.plainMessage = message;
-        const { preReleaseName } = Commit.findPreReleaseName(message);
+class Commit extends framework_source_1.FrameworkSource {
+    constructor(source, plainMessage, sha, uri, id) {
+        super(source);
+        this.sha = sha;
+        this.uri = uri;
+        this.id = id;
+        const { preReleaseName } = Commit.findPreReleaseName(plainMessage);
         this.preReleaseName = preReleaseName
             ? (0, version_1.parseSemVerPreReleaseName)(preReleaseName)
             : undefined;
         try {
-            this.conventionalCommitMessage =
-                ConventionalCommitMessage.fromString(message);
+            this.message = ConventionalCommitMessage.parse(plainMessage);
         }
         catch (_) {
-            this.conventionalCommitMessage = undefined;
+            this.message = undefined;
         }
     }
 }

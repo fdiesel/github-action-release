@@ -1,23 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Tag = void 0;
-const core_1 = require("@actions/core");
 const version_1 = require("./version");
 class Tag {
-    constructor(name) {
-        this.prefix = (0, core_1.getInput)('prefix');
-        if (name.startsWith(this.prefix)) {
-            this.version = version_1.SemVer.fromString(name.substring(this.prefix.length));
-        }
-        else {
-            this.version = version_1.SemVer.fromString(name);
-        }
+    constructor(version) {
+        this.version = version;
+        this.ref = `refs/tags/${this.toString()}`;
+        this.majorRef = `refs/tags/${this.toMajorString()}`;
+    }
+    static parseTag(tag) {
+        const version = version_1.SemVer.parse(tag.substring(Tag.PREFIX.length));
+        return new Tag(version);
+    }
+    static parseVersion(version) {
+        return new Tag(version_1.SemVer.parse(version));
     }
     toMajorString() {
-        return `${this.prefix}${this.version.major}`;
+        return `${Tag.PREFIX}${this.version.major}`;
     }
     toString() {
-        return `${this.prefix}${this.version.toString()}`;
+        return `${Tag.PREFIX}${this.version.toString()}`;
     }
 }
 exports.Tag = Tag;
+Tag.PREFIX = 'v';

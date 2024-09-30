@@ -33,29 +33,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const github_1 = require("./lib/github");
+const github_1 = require("./github");
+const inputs_1 = require("./inputs");
 const tag_1 = require("./lib/tag");
 const utils_1 = require("./lib/utils");
 const status = core.getInput('_job_status');
 const releaseId = core.getState('releaseId');
+const prevVersion = core.getState('prevVersion');
 const nextVersion = core.getState('nextVersion');
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         (0, utils_1.displayVersion)();
         if (!releaseId || !nextVersion)
             return;
-        const nextTag = new tag_1.Tag(nextVersion);
+        const nextTag = tag_1.Tag.parseTag(nextVersion);
+        const prevTag = prevVersion ? tag_1.Tag.parseVersion(prevVersion) : undefined;
+        const actions = new github_1.GitHub(inputs_1.inputs.token);
         if (status === 'success') {
-            const latestCommitSha = yield (0, github_1.getLatestCommitSha)();
-            yield (0, github_1.updateTag)(nextTag, latestCommitSha);
-            yield (0, github_1.finalizeRelease)(releaseId, latestCommitSha);
+            // get latest commit sha of branch
+            const latestCommitSha = yield actions.getLatestCommitSha();
+            // update tag and publish release with latest commit sha of branch
+            yield actions.tags.update(nextTag.ref, latestCommitSha);
+            yield actions.releases.publish(releaseId, latestCommitSha);
+            // create or update major tag if not pre-release
             if (!nextTag.version.preRelease) {
-                yield (0, github_1.updateMajorTag)(nextTag, latestCommitSha);
+                yield actions.tags.save(nextTag.majorRef, latestCommitSha);
             }
         }
         else {
-            yield (0, github_1.deleteRelease)(releaseId);
-            yield (0, github_1.deleteTag)(nextTag);
+            // rollback release and tag
+            yield actions.releases.delete(releaseId);
+            yield actions.tags.delete(nextTag.ref);
+            // rollback release branch if major version was bumped
+            if (prevTag && prevTag.version.major < nextTag.version.major) {
+                yield actions.branches.delete(`refs/heads/${prevTag.version.major}.x`);
+            }
         }
     });
 }
