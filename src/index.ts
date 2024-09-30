@@ -7,7 +7,9 @@ import { determineNextVersion, displayVersion } from './lib/utils';
 
 async function run() {
   displayVersion();
-  const actions: Actions<any> = new GitHub(inputs.token);
+  const actions: Actions<any> = new GitHub(
+    core.getInput('token', { required: true })
+  );
 
   // get latest tag from branch
   const prevTag = await actions.getPrevTag();
