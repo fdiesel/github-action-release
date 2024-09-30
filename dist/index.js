@@ -33,7 +33,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const github = __importStar(require("@actions/github"));
 const github_1 = require("./github");
 const inputs_1 = require("./inputs");
 const tag_1 = require("./lib/tag");
@@ -41,9 +40,6 @@ const utils_1 = require("./lib/utils");
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
-        const token = core.getInput('token');
-        const octokit = github.getOctokit(token);
-        yield octokit.rest.git.createRef(Object.assign(Object.assign({}, github.context.repo), { ref: 'refs/tags/funky', sha: '05bea57ca7352f3deeb9d3af2d94c8bd9916be18' }));
         (0, utils_1.displayVersion)();
         const actions = new github_1.GitHub(inputs_1.inputs.token);
         // get latest tag from branch
