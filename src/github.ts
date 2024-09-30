@@ -103,7 +103,7 @@ export class GitHub
   async getTagCommitSha(tag: Tag): Promise<string> {
     const { data } = await this.octokit.rest.git.getRef({
       ...this.repo,
-      ref: tag.toString()
+      ref: `tags/${tag.toString()}`
     });
     return data.object.sha;
   }
