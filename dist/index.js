@@ -41,6 +41,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         (0, utils_1.displayVersion)();
+        core.info(`Token length: ${core.getInput('token').length}`);
         const actions = new github_1.GitHub(core.getInput('token', { required: true }));
         // get latest tag from branch
         const prevTag = yield actions.getPrevTag();
