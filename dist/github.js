@@ -96,7 +96,7 @@ class GitHub extends GitHubAction {
     }
     getTagCommitSha(tag) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { data } = yield this.octokit.rest.git.getRef(Object.assign(Object.assign({}, this.repo), { ref: tag.toString() }));
+            const { data } = yield this.octokit.rest.git.getRef(Object.assign(Object.assign({}, this.repo), { ref: `tags/${tag.toString()}` }));
             return data.object.sha;
         });
     }
