@@ -41,7 +41,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         (0, utils_1.displayVersion)();
-        const actions = new github_1.GitHub(inputs_1.inputs.token);
+        const actions = new github_1.GitHub(core.getInput('token', { required: true }));
         // get latest tag from branch
         const prevTag = yield actions.getPrevTag();
         // get commits from branch
