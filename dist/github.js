@@ -156,12 +156,6 @@ class GitHubReleases extends GitHubAction {
     constructor(octokit) {
         super(octokit);
     }
-    getByTag(tag) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { data } = yield this.octokit.rest.repos.getReleaseByTag(Object.assign(Object.assign({}, this.repo), { tag: tag.toString() }));
-            return data;
-        });
-    }
     draft(prevTag, nextTag, commits) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data } = yield this.octokit.rest.repos.createRelease(Object.assign(Object.assign({}, this.repo), { tag_name: nextTag.toString(), name: nextTag.toString(), body: new release_1.ReleaseBody(this.baseUri, prevTag, nextTag, commits).toString(), prerelease: !!nextTag.version.preRelease, draft: true }));

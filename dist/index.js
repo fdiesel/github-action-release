@@ -44,8 +44,6 @@ function run() {
         const actions = new github_1.GitHub(inputs_1.inputs.token);
         // get latest tag from branch
         const prevTag = yield actions.getPrevTag();
-        // get latest release from branch
-        const prevRelease = prevTag && (yield actions.releases.getByTag(prevTag));
         // get commits from branch
         const commits = yield actions.getCommits(prevTag);
         // determine next version
@@ -55,8 +53,6 @@ function run() {
             // create release branch if major version is bumped
             if ((prevTag === null || prevTag === void 0 ? void 0 : prevTag.version) && (prevTag === null || prevTag === void 0 ? void 0 : prevTag.version.major) < nextTag.version.major) {
                 const prevTagCommitSha = yield actions.getTagCommitSha(prevTag);
-                // test
-                yield actions.tags.create('tags/funky', prevTagCommitSha);
                 yield actions.branches.create(`refs/heads/${prevTag.version.major}.x`, prevTagCommitSha);
             }
             // create tag and draft release
