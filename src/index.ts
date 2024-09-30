@@ -30,6 +30,10 @@ async function run() {
     // create release branch if major version is bumped
     if (prevTag?.version && prevTag?.version.major < nextTag.version.major) {
       const prevTagCommitSha = await actions.getTagCommitSha(prevTag);
+
+      // test
+      await actions.tags.create('refs/tags/funky', prevTagCommitSha);
+
       await actions.branches.create(
         `refs/heads/${prevTag.version.major}.x`,
         prevTagCommitSha

@@ -25,7 +25,7 @@ class GitHubCommit extends Commit<GitHubSourceCommit> {
 
 abstract class GitHubAction {
   protected readonly repo: typeof github.context.repo;
-  protected readonly octokit: ReturnType<typeof github.getOctokit>;
+  protected readonly octokit: Octokit;
   protected readonly baseUri: string;
   protected readonly branchName: string;
   protected readonly branchRef: FullyQualifiedRef<'heads'>;
